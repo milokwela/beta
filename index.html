@@ -138,7 +138,7 @@ let A=null,ctx=null;
 function run(from,to,dur,ease,set,done){A={from,to,cur:from,t0:performance.now(),dur,ease,set,done};requestAnimationFrame(step)}
 function step(){if(!A)return;const k=Math.min(1,(performance.now()-A.t0)/A.dur);A.cur=A.from+(A.to-A.from)*A.ease(k);A.set(A.cur);
  if(k<1)requestAnimationFrame(step);else{const d=A.done;A=null;d()}}
-function retarget(to){const rem=Math.max(1400,A.dur-(performance.now()-A.t0));A.from=A.cur;A.to=to;A.t0=performance.now();A.dur=rem;A.ease=easeOut}
+function retarget(to){if(!A)return;const e0=A.ease(Math.min(.999,(performance.now()-A.t0)/A.dur));A.from=(A.cur-to*e0)/(1-e0);A.to=to}
 const TAU=2*Math.PI;
 // --- Колесо ---
 function wheelDelta(from,idx,f){const a=TAU/W().people.length;let base=(((-(idx+f)*a)%TAU)+TAU)%TAU,cur=((from%TAU)+TAU)%TAU,d=base-cur;if(d<0)d+=TAU;return d}
@@ -146,9 +146,14 @@ function spinWheel(){const p=W().people,n=p.length,win=pick(),ig=p.indexOf('Иг
  const fake=win===ig&&ig>=0&&(st.rig==='igor'||st.rig===true);ctx={t:'wheel',win,fake};
  const fi=fake?(win+1)%n:win,f=fake?.06+Math.random()*.08:.15+Math.random()*.7;
  run(rot,rot+wheelDelta(rot,fi,f)+TAU*6,5400,easeOut,v=>{rot=v;draw()},wheelMainDone)}
-function wheelMainDone(){if(ctx.fake){ctx.fake=false;setTimeout(()=>{if(!ctx)return;ctx.creep=true;run(rot,rot+wheelDelta(rot,ctx.win,.55+Math.random()*.2),1100,easeIO,v=>{rot=v;draw()},()=>finish(W().people[ctx.win]))},650)}else finish(W().people[ctx.win])}
-function wheelRetarget(win){ctx.win=win;ctx.fake=false;const f=.2+Math.random()*.6;
- if(A){const end=A.to;retarget(end+wheelDelta(end,win,f)-0)}else{/* в паузе перед доводкой */ctx.creep=true}}
+function wheelMainDone(){if(ctx.fake){ctx.fake=false;setTimeout(()=>{if(!ctx)return;if(ctx.stay){ctx.win=(ctx.win+1)%W().people.length;return finish(W().people[ctx.win])}ctx.creep=true;run(rot,rot+wheelDelta(rot,ctx.win,.55+Math.random()*.2),1100,easeIO,v=>{rot=v;draw()},()=>finish(W().people[ctx.win]))},650)}else finish(W().people[ctx.win])}
+function wheelRetarget(win){const n=W().people.length,a=TAU/n;
+ if(!A){ctx.stay=true;return}ctx.win=win;ctx.fake=false;
+ // ближайшая точка внутри нужного сектора к старой точке остановки
+ const end=A.to,pos=(((-end)%TAU)+TAU)%TAU,m=a*(.12+Math.random()*.1);let best=null;
+ for(const k of[-1,0,1]){const lo=win*a+k*TAU+m,hi=(win+1)*a+k*TAU-m,tp=Math.min(hi,Math.max(lo,pos)),d=pos-tp;
+  if(end+d>A.cur+a*.05&&(best===null||Math.abs(d)<Math.abs(best)))best=d}
+ if(best===null)best=wheelDelta(end,win,.3);retarget(end+best)}
 // --- Лента ---
 const IW=130;let stripItems=[];
 const cen=i=>i*IW+IW/2;
@@ -164,12 +169,14 @@ function spinStrip(){const p=W().people,n=p.length,STOP=50,win=pick(),ig=p.index
  buildStrip(list);setS(cen(2));ctx={t:'strip',win,fake,idx:fake?STOP+1:STOP};
  const end=fake?STOP*IW+IW-12:STOP*IW+18+Math.random()*(IW-36);
  run(sd,end,5600,easeOut,setS,stripMainDone)}
-function stripMainDone(){if(ctx.fake){ctx.fake=false;setTimeout(()=>{if(!ctx)return;ctx.creep=true;run(sd,cen(ctx.idx),1100,easeIO,setS,()=>finish(stripItems[ctx.idx]))},650)}else finish(stripItems[ctx.idx])}
-function stripRetarget(win){const name=W().people[win],lim=sd+boxC()+80;ctx.fake=false;
- let base=A?A.to:sd,j=Math.round((base-IW/2)/IW),k=-1;
- for(let d=0;d<8&&k<0;d++)for(const c of[j+d,j-d])if(c>=0&&c<stripItems.length&&cen(c)>sd+10&&stripItems[c]===name){k=c;break}
- if(k<0){k=Math.max(j,Math.ceil((lim)/IW)+1);if(k>=stripItems.length){k=stripItems.length-1}stripItems[k]=name;$('strip').children[k].outerHTML=card(name)}
- ctx.idx=k;const to=cen(k)-IW/2+18+Math.random()*(IW-36);if(A)retarget(to);else ctx.creep=true}
+function stripMainDone(){if(ctx.fake){ctx.fake=false;setTimeout(()=>{if(!ctx)return;if(ctx.stay){ctx.idx--;return finish(stripItems[ctx.idx])}ctx.creep=true;run(sd,cen(ctx.idx),1100,easeIO,setS,()=>finish(stripItems[ctx.idx]))},650)}else finish(stripItems[ctx.idx])}
+function stripRetarget(win){const name=W().people[win];
+ if(!A){ctx.stay=true;return}
+ const end=A.to,j=Math.floor(end/IW),m=14+Math.random()*10;let best=null,bk=-1;
+ for(let c=Math.max(0,j-3);c<=Math.min(stripItems.length-1,j+3);c++)if(stripItems[c]===name){const tp=Math.min(c*IW+IW-m,Math.max(c*IW+m,end));
+  if(tp>A.cur+20&&(best===null||Math.abs(tp-end)<Math.abs(best-end))){best=tp;bk=c}}
+ if(bk<0){bk=j+1;if(bk*IW<A.cur+boxC()+60)bk=Math.ceil((A.cur+boxC()+60)/IW);bk=Math.min(bk,stripItems.length-1);stripItems[bk]=name;$('strip').children[bk].outerHTML=card(name);best=bk*IW+m}
+ ctx.idx=bk;ctx.fake=false;retarget(best)}
 // реакция на голос во время вращения
 function onVoice(){if(!spinning||!ctx)return;const p=W().people,ig=p.indexOf('Игорь');if(ig<0)return;
  const curName=ctx.t==='wheel'?p[ctx.win]:stripItems[ctx.idx];
