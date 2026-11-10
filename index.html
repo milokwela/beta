@@ -45,6 +45,8 @@ button,input{font:inherit;border:0;margin:0}
 .pane p{margin:6px 0;font-weight:700;font-size:15px}
 #code{font:900 46px system-ui;letter-spacing:8px}
 #join{width:100%;height:60px;border-radius:30px;text-align:center;font-size:30px;letter-spacing:10px;text-transform:uppercase;color:#11296b;background:#fff}
+#nick{width:min(86vw,380px);height:52px;border-radius:26px;text-align:center;font-size:20px;color:#11296b;background:#fff;margin:4px 0}
+@media(max-height:560px){.big{height:48px;margin:3px 0}#logo b{font-size:30px}#nav{display:none}#code{font-size:32px}}
 #err{min-height:22px;color:#ffe07a;margin:4px 0;font-size:15px;text-align:center}
 #toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);padding:10px 18px;border-radius:20px;background:#0b2d5aee;border:2px solid #fff;z-index:9;pointer-events:none}
 </style></head><body>
@@ -58,16 +60,16 @@ button,input{font:inherit;border:0;margin:0}
 <div id="mt"><button id="gear" class="rb">🔊</button><div class="pill sh">🪙 <span id="wc">0</span></div></div>
 <div id="logo"><b class="a">ПЫКАЮЩИЕ</b><b class="c">БЕГЕМОТЫ</b><i>3D</i></div>
 <div id="bt">
- <div id="mm" class="pane"><button id="host" class="big lime"><i>▶</i>Создать комнату</button><button id="jn" class="big blue"><i>👥</i>Играть с другом</button><button id="solo" class="big org"><i>🧍</i>Одиночная игра</button></div>
- <div id="pj" class="pane" hidden><p class="sh">Введи код комнаты друга</p><input id="join" maxlength="4" placeholder="КОД"><button id="go" class="big lime"><i>▶</i>Войти</button><button class="big blue back"><i>←</i>Назад</button></div>
- <div id="ph" class="pane" hidden><p class="sh">Код комнаты — отправь другу</p><b id="code" class="sh">····</b><p class="sh">Ждём второго игрока…</p><button id="share" class="big lime"><i>🔗</i>Поделиться ссылкой</button><button class="big blue back"><i>←</i>Назад</button></div>
+ <div id="mm" class="pane"><input id="nick" maxlength="12" placeholder="Твой ник" autocomplete="off"><button id="onl" class="big lime"><i>▶</i>Играть онлайн</button><button id="jn" class="big blue"><i>👥</i>Играть с другом</button><button id="solo" class="big org"><i>🧍</i>Одиночная игра</button></div>
+ <div id="pf" class="pane" hidden><button id="host" class="big lime"><i>＋</i>Создать комнату</button><p class="sh">или введи код друга</p><input id="join" maxlength="4" placeholder="КОД"><button id="go" class="big blue"><i>▶</i>Войти</button><button class="big org back"><i>←</i>Назад</button></div>
+ <div id="wt" class="pane" hidden><p id="wtt" class="sh"></p><b id="code" class="sh"></b><button id="share" class="big lime" hidden><i>🔗</i>Поделиться ссылкой</button><button class="big blue back"><i>←</i>Назад</button></div>
  <div id="err"></div>
  <div id="nav"><button class="rb" data-t="t">🏆</button><button class="rb" data-t="Магазин скоро появится">🛒</button><button class="rb" data-t="Скины скоро появятся">🎨</button><button class="rb" data-t="Профиль скоро появится">👤</button></div>
 </div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
-const $=i=>document.getElementById(i),L=900,R=2.1,F=24,TAU=Math.PI*2,LO=[-2.69,.45],HI=[-.45,2.69],CPS=[0,180,360,540,720];
+const $=i=>document.getElementById(i),L=900,R=2.1,F=24,TAU=Math.PI*2,TA=[.3,-.3],LO=[-2.69,.45],HI=[-.45,2.69],CPS=[0,180,360,540,720];
 const cx=s=>18*Math.sin(s/70)+8*Math.sin(s/29+1)-6.73,dcx=s=>18/70*Math.cos(s/70)+8/29*Math.cos(s/29+1),HW=s=>11+2*Math.sin(s/90);
 const rAng=z=>-Math.atan(dcx(-z)),wrap=a=>a-TAU*Math.round(a/TAU);
 function m32(a){return()=>{var t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
@@ -91,7 +93,7 @@ const wu={uT:{value:0}};
 sc.add(ribbon([s=>[cx(s)-HW(s)-.3,0,-s],s=>[cx(s)+HW(s)+.3,0,-s]],new THREE.ShaderMaterial({uniforms:wu,
 vertexShader:`varying vec2 vU;varying vec3 vP;varying float vD;void main(){vU=uv;vP=position;vec4 mv=modelViewMatrix*vec4(position,1.);vD=length(mv.xyz);gl_Position=projectionMatrix*mv;}`,
 fragmentShader:`uniform float uT;varying vec2 vU;varying vec3 vP;varying float vD;void main(){float e=abs(vU.x*2.-1.);vec3 c=mix(vec3(.02,.5,.95),vec3(.25,.85,1.),smoothstep(0.,1.,e));float w=sin(vP.x*1.1+sin(vP.z*.5+uT)*1.6+vP.z*.8-uT*2.4)*.5+.5;float w2=sin(vP.x*2.3-vP.z*1.7+uT*1.8)*.5+.5;float w3=sin(vP.x*3.1+vP.z*2.7-uT*2.6)*sin(vP.x*2.2-vP.z*3.3+uT*2.)*.5+.5;c+=smoothstep(.82,.97,w)*.28+smoothstep(.88,.99,w2)*.2+pow(w3,12.)*.55;c=mix(c,vec3(1.),smoothstep(.84,1.,e)*(.55+.45*sin(vP.z*1.5+uT*3.)));c=mix(c,vec3(.68,.89,1.),smoothstep(70.,260.,vD));gl_FragColor=vec4(c,1.);}`})));
-const orange=M(0xf28c5e,{side:2}),grass=M(0x82d44f,{side:2});
+const orange=M(0xf28c5e,{side:2}),grass=M(0xeaa27e,{side:2});
 [-1,1].forEach(d=>{const e=s=>cx(s)+d*(HW(s)+.2),pts=[];sc.add(ribbon([s=>[e(s),-1,-s],s=>[e(s),1.4,-s]],orange),ribbon([s=>[e(s),1.4,-s],s=>[e(s)+d*150,1.4,-s]],grass));
  for(let s=-20;s<=L+80;s+=8)pts.push(new THREE.Vector3(cx(s)+d*(HW(s)+.25),1.5,-s));
  sc.add(Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),260,.5,8),M(0x6fd04a)))});
@@ -145,8 +147,12 @@ function hippo(c,nc){const g=new THREE.Group(),m=M(c),e=new THREE.MeshBasicMater
  [-1,1].forEach(d=>g.add(Mesh(new THREE.SphereGeometry(.17,10,8),e,d*.24,1.62,-1.1),Mesh(new THREE.SphereGeometry(.085,8,6),k,d*.24,1.64,-1.26),Mesh(new THREE.SphereGeometry(.14,8,6),m,d*.42,1.72,-.75),Mesh(new THREE.CylinderGeometry(.14,.14,.4,8),m,d*.4,.2,-.45),Mesh(new THREE.CylinderGeometry(.14,.14,.4,8),m,d*.4,.2,.65),Mesh(new THREE.SphereGeometry(.04,6,6),k,d*.15,1.12,-1.78)));
  return g}
 const hip=[hippo(0xe0975a,0xf2b39a),hippo(0x55555f,0x7a7a85)],vb=[-.7,.7];hip.forEach(h=>boat.add(h));sc.add(boat);
+const rpg=new THREE.RingGeometry(.9,1,36),rp=[];for(let i=0;i<10;i++){const m=Mesh(rpg,new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,fog:false,side:2}),0,.07,0);m.rotation.x=-Math.PI/2;m.visible=false;sc.add(m);rp.push({m,l:0})}
+let rpi=0,rpt=0;
 const foam=Mesh(new THREE.RingGeometry(2.2,3.3,40),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.55,depthWrite:false,fog:false}),0,.06,0);foam.rotation.x=-Math.PI/2;sc.add(foam);
 const sh=Mesh(new THREE.CircleGeometry(2.6,32),new THREE.MeshBasicMaterial({color:0x0a3a7a,transparent:true,opacity:.28,depthWrite:false}),0,.04,0);sh.rotation.x=-Math.PI/2;sc.add(sh);
+const names=['Игрок','Игрок'],nsp=[0,1].map(i=>{const c=document.createElement('canvas');c.width=256;c.height=64;const t=new THREE.CanvasTexture(c),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false,transparent:true,fog:false}));sp.scale.set(3.6,.9,1);sp.position.set(0,2.7,0);sp.renderOrder=9;sp.userData={c,t};hip[i].add(sp);return sp});
+function setNames(){nsp.forEach((sp,i)=>{const c=sp.userData.c,g=c.getContext('2d');g.clearRect(0,0,256,64);g.font='900 34px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.lineWidth=9;g.strokeStyle='#0b2d5a';g.fillStyle=i==me?'#ffe23a':'#fff';g.strokeText(names[i],128,34);g.fillText(names[i],128,34);sp.userData.t.needsUpdate=true})}
 const mark=Mesh(new THREE.ConeGeometry(.28,.6,8),new THREE.MeshBasicMaterial({color:0xffe23a}),0,3,0);mark.rotation.x=Math.PI;
 /* пых-облака и звук */
 const pg=new THREE.SphereGeometry(1,10,8),pu=[];let pi=0;
@@ -167,12 +173,12 @@ function step(dt){S.T+=dt;S.inv=Math.max(0,S.inv-dt);if(S.ph==2)S.rt+=dt;
  for(let i=0;i<2;i++){const p=inp[i];S.g[i]=Math.max(LO[i],Math.min(HI[i],S.g[i]+p.m*2.6*dt));
   S.cd[i]=Math.max(0,S.cd[i]-dt);if(p.n!=p.s){p.s=p.n;p.q=1}
   if(S.ph==2&&!S.dead&&S.cd[i]<=0&&(p.q||p.f)){S.bu[i]=.4;S.cd[i]=.95;p.q=0}else if(S.ph!=2)p.q=0;
-  if(S.bu[i]>0){S.bu[i]=Math.max(0,S.bu[i]-dt);const be=ra+S.g[i];S.vx-=Math.sin(be)*F*dt;S.vz-=Math.cos(be)*F*dt}}
+  if(S.bu[i]>0){S.bu[i]=Math.max(0,S.bu[i]-dt);const be=S.a+S.g[i]+TA[i];S.vx-=Math.sin(be)*F*dt;S.vz-=Math.cos(be)*F*dt;S.w-=1.15*F*Math.sin(TA[i])/9*dt}}
  if(S.dead>0){S.bu=[0,0];S.dead-=dt;if(S.dead<=0){const cs=CPS[S.cp]+4;Object.assign(S,{x:cx(cs),z:-cs,a:0,vx:0,vz:0,w:0,hp:100,inv:2,dead:0})}else return}
  if(S.ph<2)return;
  let s=-S.z,n=Math.hypot(dcx(s),1);
  if(S.ph==2){S.vx+=dcx(s)/n*1.4*dt;S.vz+=-1/n*1.4*dt}
- const dr=Math.exp(-.85*dt);S.vx*=dr;S.vz*=dr;S.w*=Math.exp(-2*dt);S.x+=S.vx*dt;S.z+=S.vz*dt;S.a+=S.w*dt;
+ const dr=Math.exp(-.85*dt);S.vx*=dr;S.vz*=dr;S.w+=wrap(ra-S.a)*1.6*dt;S.w*=Math.exp(-1.6*dt);S.x+=S.vx*dt;S.z+=S.vz*dt;S.a+=S.w*dt;
  s=-S.z;n=Math.hypot(dcx(s),1);const c=cx(s),lim=HW(s)-R,d=S.x-c;
  if(Math.abs(d)>lim){const sg=Math.sign(d),nx=1/n,nz=dcx(s)/n;S.x=c+sg*lim;const vn=(S.vx*nx+S.vz*nz)*sg;if(vn>0){S.vx-=1.5*vn*sg*nx;S.vz-=1.5*vn*sg*nz;S.w*=.8}}
  for(const o of OB){const[ox,oz,ux,uz]=oC(o,S.T);if(Math.abs(oz-S.z)>14)continue;
@@ -193,17 +199,17 @@ let pf=[0,0],pb=[0,0],wk=0,pHp=100,pCo=0,pCp=0,cpT=0,fin=0,lm='';
 const fmt=t=>(t/60|0)+':'+(t%60).toFixed(1).padStart(4,'0');
 function view(dt){const ra=rAng(S.z),s=-S.z,n=Math.hypot(dcx(s),1),k=Math.min(1,dt*3),kp=Math.min(1,dt*5);
  cf.x+=(dcx(s)/n-cf.x)*k;cf.z+=(-1/n-cf.z)*k;const l=Math.hypot(cf.x,cf.z);cf.x/=l;cf.z/=l;
- cam.position.x+=(S.x-cf.x*14-cam.position.x)*kp;cam.position.y+=(10-cam.position.y)*kp;cam.position.z+=(S.z-cf.z*14-cam.position.z)*kp;
- cam.lookAt(S.x+cf.x*10,.5,S.z+cf.z*10);
+ cam.position.x+=(S.x-cf.x*11-cam.position.x)*kp;cam.position.y+=(13-cam.position.y)*kp;cam.position.z+=(S.z-cf.z*11-cam.position.z)*kp;
+ cam.lookAt(S.x+cf.x*6,0,S.z+cf.z*6);
  const dk=S.dead>0?1-S.dead/2.2:0;
- boat.position.set(S.x,Math.sin(S.T*2.5)*.07-dk*3.2,S.z);boat.rotation.set(dk*.5,ra,Math.sin(S.T*1.7)*.03+dk*.3);boat.visible=!(S.inv>0&&!S.dead&&Math.floor(S.T*14)%2);
+ boat.position.set(S.x,Math.sin(S.T*2.5)*.07-dk*3.2,S.z);boat.rotation.set(dk*.5,S.a,Math.sin(S.T*1.7)*.03+dk*.3);boat.visible=!(S.inv>0&&!S.dead&&Math.floor(S.T*14)%2);
  hip.forEach((h,i)=>{const dl=S.g[i]-vb[i];vb[i]+=dl*Math.min(1,dt*14);const bl=vb[i],b=S.bu[i]>0,mv=Math.abs(dl)>.04;
-  h.position.set(Math.sin(bl)*1.15,.2+(mv?Math.abs(Math.sin(S.T*16))*.07:0),Math.cos(bl)*1.15);h.rotation.y=bl;
+  h.position.set(Math.sin(bl)*1.15,.2+(mv?Math.abs(Math.sin(S.T*16))*.07:0),Math.cos(bl)*1.15);h.rotation.y=bl+TA[i];
   const sq=dk>0?1-dk*.4:1;h.scale.set((b?1.12:1)*.85,(b?.9:1)*.85*sq,(b?1.12:1)*.85);
-  if(b){pf[i]-=dt;if(pf[i]<=0){pf[i]=.045;const bx=Math.sin(ra+S.g[i]),bz=Math.cos(ra+S.g[i]);h.getWorldPosition(V2);V2.set(V2.x+bx*1.1,.9,V2.z+bz*1.1);for(let j=0;j<3;j++)puff(V2.clone().add(V.set((Math.random()-.5)*.8,Math.random()*.5,(Math.random()-.5)*.8)),V.set(bx*5+(Math.random()-.5)*3,1.2+Math.random(),bz*5+(Math.random()-.5)*3),j?0x9fe01a:0xb8f21c,.6,3,1.1)}}
+  if(b){pf[i]-=dt;if(pf[i]<=0){pf[i]=.045;const bx=Math.sin(S.a+S.g[i]+TA[i]),bz=Math.cos(S.a+S.g[i]+TA[i]);h.getWorldPosition(V2);V2.set(V2.x+bx*1.1,.9,V2.z+bz*1.1);for(let j=0;j<3;j++)puff(V2.clone().add(V.set((Math.random()-.5)*.8,Math.random()*.5,(Math.random()-.5)*.8)),V.set(bx*5+(Math.random()-.5)*3,1.2+Math.random(),bz*5+(Math.random()-.5)*3),j?0x9fe01a:0xb8f21c,.6,3,1.1)}}
   if(b&&!pb[i]){fart();if(i==me&&navigator.vibrate)navigator.vibrate(40)}pb[i]=b});
  wk-=dt;const sp=Math.hypot(S.vx,S.vz);if(wk<=0&&sp>2&&S.ph>1&&!S.dead){wk=.1;puff(V2.set(S.x-S.vx/sp*2.2,.1,S.z-S.vz/sp*2.2),V.set(0,.4,0),0xffffff,.5,1.5,.7)}
- upPuff(dt);wu.uT.value=S.T;foam.position.set(S.x,.06,S.z);foam.scale.setScalar(1+Math.sin(S.T*3)*.05+Math.min(1,sp/8)*.2);sh.position.set(S.x+1,.04,S.z+1);foam.visible=sh.visible=dk<.5;sky.position.copy(cam.position);mark.position.y=3+Math.sin(S.T*4)*.15;
+ upPuff(dt);wu.uT.value=S.T;foam.position.set(S.x,.06,S.z);foam.scale.setScalar(1+Math.sin(S.T*3)*.05+Math.min(1,sp/8)*.2);sh.position.set(S.x+1,.04,S.z+1);foam.visible=sh.visible=dk<.5;rpt-=dt;if(rpt<=0&&sp>1.5&&S.ph>1&&!S.dead){rpt=.4;const q=rp[rpi++%10];q.m.position.set(S.x-S.vx/sp*1.5,.07,S.z-S.vz/sp*1.5);q.l=1.6}rp.forEach(q=>{if(q.l>0){q.l-=dt;const k=1-q.l/1.6;q.m.visible=q.l>0;q.m.scale.setScalar(1.5+k*3.5);q.m.material.opacity=.7*(1-k)}});sky.position.copy(cam.position);mark.position.y=3+Math.sin(S.T*4)*.15;
  for(const o of OB){const[x,z,ux,uz]=oC(o,S.T);if(o.t==2){o.m.position.set(x,.2,z);o.m.rotation.y=-Math.atan2(uz,ux);o.m.userData.sp.rotation.x=S.T*1.5}else{o.m.position.set(x,o.t==1?-.2:Math.sin(S.T*2+o.ph)*.12,z);if(o.t==0)o.m.userData.sp.rotation.y=S.T*.8+o.ph}}
  CO.forEach((c,i)=>{c.m.visible=!got[i];c.m.rotation.y=S.T*3+i;c.m.position.y=1.2+Math.sin(S.T*3+i)*.2});
  cpm.forEach((m,i)=>{if(m)m.color.set(S.cp>=i?0x4cd964:0xe9b94a)});
@@ -219,28 +225,38 @@ function view(dt){const ra=rAng(S.z),s=-S.z,n=Math.hypot(dcx(s),1),k=Math.min(1,
 /* ---------- меню и сеть ---------- */
 const hudIds=['prog','top','arr','fb'];
 function play(on){$('menu').hidden=on;hudIds.forEach(i=>$(i).hidden=!on)}
-const pane=n=>['mm','pj','ph'].forEach(k=>$(k).hidden=k!=n),err=t=>$('err').textContent=t||'';
+const pane=n=>['mm','pf','wt'].forEach(k=>$(k).hidden=k!=n),err=t=>$('err').textContent=t||'';
 function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,1800)}
-function setRole(r,i){role=r;me=i;hip[i].add(mark)}
+function setRole(r,i){role=r;me=i;hip[i].add(mark);setNames()}
 const gen=()=>Array.from({length:4},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.random()*24|0]).join('');
-function menu(t){role=null;S.ph=0;if(peer)try{peer.destroy()}catch(e){}peer=conn=null;S.g=[-.7,.7];play(false);pane('mm');err(t)}
-function host(){setRole('host',0);code=gen();$('code').textContent='····';pane('ph');peer=new Peer('fartboat-'+code);
- peer.on('open',()=>$('code').textContent=code);
- peer.on('error',e=>{if(e.type=='unavailable-id'){peer.destroy();host()}else err('Ошибка сети: '+e.type)});
- peer.on('connection',c=>{if(conn&&conn.open){c.close();return}conn=c;
-  c.on('open',()=>{play(true);reset()});
-  c.on('data',d=>{if(d.k=='i'){inp[1].m=d.m;inp[1].f=d.f;inp[1].n=d.n}});
-  c.on('close',()=>{conn=null;S.ph=0;play(false);pane('ph');err('Друг отключился. Ждём нового игрока…')})})}
-function join(c){c=c.trim().toUpperCase();if(c.length!=4)return err('Введи код из 4 букв');err('Подключаемся…');setRole('guest',1);peer=new Peer();
- peer.on('open',()=>{conn=peer.connect('fartboat-'+c,{reliable:true});
-  conn.on('open',()=>{play(true);err('');sendIn()});
-  conn.on('data',d=>{if(d.k=='s'){NET=d;NET.at=performance.now()}});
-  conn.on('close',()=>menu('Связь потеряна'))});
+let myName='Игрок',mm=0,wt=0;
+const nm=n=>String(n||'Игрок').slice(0,12);
+function nick(){myName=nm($('nick').value.trim());try{localStorage.fbn=myName}catch(e){}}
+function menu(t){mm++;clearTimeout(wt);role=null;S.ph=0;if(peer)try{peer.destroy()}catch(e){}peer=conn=null;S.g=[-.7,.7];play(false);pane('mm');err(t)}
+function wait(t,c){$('wtt').textContent=t;$('code').textContent=c||'';$('share').hidden=!c;err('');pane('wt')}
+function pair(c,ho,n){conn=c;names[0]=ho?myName:n;names[1]=ho?n:myName;setRole(ho?'host':'guest',ho?0:1);clearTimeout(wt);
+ c.on('close',()=>{if(conn===c)menu('Соперник вышел')});
+ if(ho){c.on('data',d=>{if(d.k=='i'){inp[1].m=d.m;inp[1].f=d.f;inp[1].n=d.n}});c.send({k:'hi',n:myName});reset()}
+ else{NET=null;c.on('data',d=>{if(d.k=='s'){NET=d;NET.at=performance.now()}});sendIn()}
+ play(true);err('')}
+function hostWire(p){p.on('connection',c=>{let ok=0;c.on('data',d=>{if(ok||d.k!='hi')return;ok=1;if(conn){c.send({k:'busy'});setTimeout(()=>c.close(),400);return}pair(c,1,nm(d.n))})})}
+function onl(){nick();const tok=++mm;wait('Ищем игрока…');tryS(1,tok)}
+function tryS(i,tok){if(tok!=mm)return;if(i>10)i=1;const p=new Peer('fartboat-q'+i);
+ p.on('open',()=>{if(tok!=mm){p.destroy();return}peer=p;hostWire(p);clearTimeout(wt);wt=setTimeout(()=>{if(tok==mm&&!conn){try{p.destroy()}catch(e){}peer=null;tryS(1,tok)}},9000+Math.random()*5000)});
+ p.on('error',e=>{if(conn&&peer===p)return;try{p.destroy()}catch(x){}if(tok!=mm)return;if(e.type=='unavailable-id')probe(i,tok);else setTimeout(()=>tryS(i,tok),1500)})}
+function probe(i,tok){const g=new Peer();let done=0,to;const nx=()=>{if(done)return;done=1;clearTimeout(to);try{g.destroy()}catch(e){}setTimeout(()=>tryS(i+1,tok),150)};
+ g.on('error',nx);g.on('open',()=>{const c=g.connect('fartboat-q'+i,{reliable:true});to=setTimeout(nx,5000);c.on('open',()=>c.send({k:'hi',n:myName}));
+  c.on('data',d=>{if(done)return;if(d.k=='hi'){done=2;clearTimeout(to);if(tok!=mm){g.destroy();return}peer=g;pair(c,0,nm(d.n))}else if(d.k=='busy')nx()});c.on('close',()=>{if(done<2)nx()})})}
+function host(){nick();++mm;code=gen();setRole('host',0);wait('Код комнаты — отправь другу','····');peer=new Peer('fartboat-'+code);
+ peer.on('open',()=>{$('code').textContent=code;hostWire(peer)});
+ peer.on('error',e=>{if(conn)return;if(e.type=='unavailable-id'){peer.destroy();host()}else err('Ошибка сети: '+e.type)})}
+function join(c){nick();c=c.trim().toUpperCase();if(c.length!=4)return err('Введи код из 4 букв');err('Подключаемся…');const tok=++mm;peer=new Peer();
+ peer.on('open',()=>{const k=peer.connect('fartboat-'+c,{reliable:true});k.on('open',()=>k.send({k:'hi',n:myName}));k.on('data',d=>{if(d.k=='hi'&&tok==mm&&!conn)pair(k,0,nm(d.n));else if(d.k=='busy')err('Комната занята')})});
  peer.on('error',e=>err(e.type=='peer-unavailable'?'Комната не найдена':'Ошибка сети: '+e.type))}
 function sendIn(){if(role=='guest'&&conn&&conn.open)conn.send({k:'i',m:inp[1].m,f:inp[1].f,n:inp[1].n})}
-$('host').onclick=()=>{audio();host()};$('jn').onclick=()=>{audio();pane('pj');err('')};$('go').onclick=()=>{audio();join($('join').value)};
+$('onl').onclick=()=>{audio();onl()};$('jn').onclick=()=>{audio();pane('pf');err('')};$('host').onclick=()=>{audio();host()};$('go').onclick=()=>{audio();join($('join').value)};
 document.querySelectorAll('.back').forEach(b=>b.onclick=()=>menu(''));
-$('solo').onclick=()=>{audio();setRole('solo',0);play(true);reset()};
+$('solo').onclick=()=>{audio();nick();names[0]=myName;names[1]='Друг';setRole('solo',0);play(true);reset()};
 $('again').onclick=reset;
 $('gear').onclick=()=>{mute=!mute;$('gear').textContent=mute?'🔇':'🔊'};
 document.querySelectorAll('#nav .rb').forEach(b=>b.onclick=()=>toast(b.dataset.t=='t'?(best?'Лучшее время: '+fmt(best):'Рекордов пока нет'):b.dataset.t));
@@ -261,6 +277,7 @@ function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/
  if(role=='guest')guestSync(dt);else if(role=='solo'||(role=='host'&&conn&&conn.open))step(dt);else S.T+=dt;
  st+=dt;if(st>.05){st=0;if(role=='host'&&conn&&conn.open)conn.send({k:'s',ph:S.ph,T:S.T,cnt:S.cnt,rt:S.rt,b:[S.x,S.z,S.a,S.vx,S.vz,S.w],g:S.g,bu:S.bu,cd:S.cd,hp:S.hp,dd:S.dead,cp:S.cp,cn:S.coins,co:S.cl,iv:S.inv});else sendIn()}
  view(dt);ren.render(sc,cam)}
+setNames();try{$('nick').value=localStorage.fbn||''}catch(e){}
 requestAnimationFrame(loop);
 const q=new URLSearchParams(location.search).get('room');if(q){$('join').value=q.slice(0,4);setTimeout(()=>join(q),400)}
 </script></body></html>
